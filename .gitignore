@@ -1,0 +1,13 @@
+# artefatos de compilação do GHC
+build/
+*.hi
+*.o
+*.dyn_hi
+*.dyn_o
+tabela
+tabela.exe
+
+# editores / sistema
+.vscode/
+.idea/
+.DS_Store
