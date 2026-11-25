@@ -68,6 +68,6 @@ Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`.
 - [x] Camada 1 - tipos (`Time`, `Resultado`, `Partida`, `Linha`)
 - [x] Camada 1 - consultas básicas (`participou`, `resultadoPara`, `times`)
 - [ ] Campeonato de teste (`Dados.hs`)
-- [ ] Camada 2 - classificação e estatísticas
+- [x] Camada 2 - classificação e estatísticas
 - [ ] Camada 3 - leitura, validação e tabela formatada
 - [ ] Testes das três camadas

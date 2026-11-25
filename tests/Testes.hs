@@ -9,6 +9,10 @@ main :: IO ()
 main = do
   let jogo = Partida 1 "Coritiba" 1 2 "Athletico"
       empate = Partida 2 "Athletico" 0 0 "Londrina"
+      goleada = Partida 3 "Londrina" 4 0 "Coritiba"
+      -- Athletico e Londrina terminam com 4 pontos e 1 vitoria cada:
+      -- quem decide e o saldo (Londrina +4, Athletico +1)
+      tresRodadas = [jogo, empate, goleada]
       linhaAthletico = linhaDoTime [jogo, empate] "Athletico"
       conferir nome obtido esperado =
         (nome, obtido == esperado, show obtido)
@@ -37,6 +41,17 @@ main = do
         , conferir "aproveitamento sem jogos" (aproveitamento (linhaDoTime [] "Cascavel")) 0
         , conferir "ate a rodada 1" (ateRodada 1 [jogo, empate]) [jogo]
         , conferir "ate a rodada 0" (ateRodada 0 [jogo, empate]) []
+        , conferir "classificacao sem partidas" (classificacao []) []
+        , conferir "desempate pelo saldo (mesmos pontos e vitorias)"
+            (map time (classificacao tresRodadas)) ["Londrina", "Athletico", "Coritiba"]
+        , conferir "pontos empatados de quem desempatou"
+            (map pontosLinha (classificacao tresRodadas)) [4, 4, 0]
+        , conferir "classificacao ate a rodada 2 difere da final"
+            (map time (classificacao (ateRodada 2 tresRodadas))) ["Athletico", "Londrina", "Coritiba"]
+        , conferir "maior goleada" (maiorGoleada tresRodadas) (Just goleada)
+        , conferir "maior goleada sem partidas" (maiorGoleada []) Nothing
+        , conferir "media de gols" (mediaGols [jogo, goleada]) (Just 3.5)
+        , conferir "media de gols sem partidas" (mediaGols []) Nothing
         ]
   mapM_ (\(nome, ok, valor) -> putStrLn
     (if ok then "OK " ++ nome else "FALHOU " ++ nome ++ ": " ++ valor)) casos

@@ -116,7 +116,11 @@ para que o `main` passe pela leitura e pela validação, exatamente como uma ent
 
 ## 2. Camada 2 - Classificação (`Classificacao.hs`)
 
-### 🕓 Sem recursão explícita; só `map`, `filter`, dobras e composição
+### ✅ Sem recursão explícita; só `map`, `filter`, dobras e composição
+
+Na camada inteira: `map` (linhas de cada time, total de gols), `filter` (`ateRodada`),
+dobras (`foldl'` em `linhaDoTime`, `foldr` em `maiorGoleada`) e composição com `(.)`
+(`(<= n) . rodada`, `Down . pontosLinha`).
 
 ### ✅ `linhaDoTime` com `foldl'` (dobra à esquerda estrita, de `Data.List`)
 
@@ -126,7 +130,7 @@ Usamos a versão estrita `foldl'`, como em `saldoFinal = foldl' aplicar` (Aula 1
 acumular cálculos pendentes. O resultado de cada partida vem de `resultadoPara`, tratado
 como `Maybe` (com `maybe`).
 
-### 🕓 Ordenação como **uma única** comparação
+### ✅ Ordenação como **uma única** comparação
 
 ```haskell
 sortBy (comparing (Down . pontosLinha)
@@ -139,12 +143,16 @@ sortBy (comparing (Down . pontosLinha)
 `Ordering` é um `Monoid`: `<>` só olha o próximo critério quando o anterior deu `EQ`.
 Evita a armadilha de encadear vários `sortBy` esperando que um preserve o anterior.
 
-### 🕓 Funções totais
+### ✅ Funções totais
 
 - `aproveitamento`: `fromIntegral` nos dois lados da divisão (não `div`), em **percentual de 0 a 100**;
   0 quando o time não jogou (evita divisão por zero).
 - `maiorGoleada` e `mediaGols`: `Nothing` para lista vazia, sem `head`, `maximum` ou `foldr1`.
   Em `maiorGoleada`, se duas partidas tiverem a mesma diferença, vale a que aparece primeiro.
+  Ela é um `foldr` cujo acumulador é um `Maybe Partida`: começa em `Nothing` e cada partida
+  substitui a atual só se a diferença for **maior ou igual** (como o `foldr` percorre da direita
+  para a esquerda, o "igual" faz a mais antiga vencer o empate).
+  `mediaGols` trata a lista vazia por casamento de padrão antes de dividir.
 - `ateRodada n`: `filter ((<= n) . rodada)`.
 
 ---
