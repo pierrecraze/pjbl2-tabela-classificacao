@@ -118,7 +118,7 @@ para que o `main` passe pela leitura e pela validação, exatamente como uma ent
 
 ### 🕓 Sem recursão explícita; só `map`, `filter`, dobras e composição
 
-### 🕓 `linhaDoTime` com `foldl'` (dobra à esquerda estrita, de `Data.List`)
+### ✅ `linhaDoTime` com `foldl'` (dobra à esquerda estrita, de `Data.List`)
 
 A linha começa "zerada" e cada partida em que o time jogou é somada a ela, na ordem das
 rodadas. Uma dobra à esquerda descreve exatamente isso (acumulador = linha parcial).
