@@ -101,16 +101,33 @@ da Camada 2 e os dois nomes colidiriam.
 - `times`: junta mandantes e visitantes, remove repetidos com `nub` e ordena com `sort`.
   Evitamos o idioma `map head . group . sort` porque `head` é parcial.
 
-### 🕓 Campeonato de teste (`Dados.hs`)
+### ✅ Campeonato de teste (`Dados.hs`)
 
-Times do futebol paranaense (Athletico, Coritiba, Paraná, Operário, Londrina, Cascavel):
+Times do futebol paranaense (Athletico, Cascavel, Coritiba, Londrina, Operário, Paraná):
 6 times em turno único dão exatamente **5 rodadas de 3 jogos**, com cada time jogando uma
-vez por rodada. O campeonato será montado para ter, no mínimo: um 0 x 0, uma vitória por
-3 ou mais gols, e dois times empatados em pontos cuja ordem seja decidida por um critério
-de desempate (e um teste deixando claro qual critério decidiu).
+vez por rodada e cada par de times se enfrentando uma única vez (15 partidas).
+Cobre os mínimos do enunciado: um 0 x 0 (Coritiba x Operário, rodada 2), vitórias por
+3 ou mais gols (Athletico 4 x 0 Cascavel e Coritiba 3 x 0 Cascavel) e um empate em pontos.
 
-Os dados ficam como `String` (`unlines [...]`) no próprio código, no formato da Camada 3,
-para que o `main` passe pela leitura e pela validação, exatamente como uma entrada real.
+Tabela final esperada, conferida à mão (e batida com `classificacao`):
+
+| Pos | Time      | P  | J | V | E | D | GP | GC | SG  |
+| --- | --------- | -- | - | - | - | - | -- | -- | --- |
+| 1   | Athletico | 10 | 5 | 3 | 1 | 1 | 9  | 4  | +5  |
+| 2   | Coritiba  | 10 | 5 | 3 | 1 | 1 | 7  | 3  | +4  |
+| 3   | Londrina  | 10 | 5 | 3 | 1 | 1 | 7  | 4  | +3  |
+| 4   | Paraná    | 5  | 5 | 1 | 2 | 2 | 5  | 6  | -1  |
+| 5   | Operário  | 4  | 5 | 1 | 1 | 3 | 4  | 5  | -1  |
+| 6   | Cascavel  | 3  | 5 | 1 | 0 | 4 | 1  | 11 | -10 |
+
+O empate é **triplo** (10 pontos e 3 vitórias para os três primeiros) e quem decide a ordem é
+o **saldo de gols** (+5, +4, +3). Até a rodada 3 a ordem é outra
+(Athletico, Londrina, Operário, Coritiba, Paraná, Cascavel), o que mostra `ateRodada` funcionando.
+
+Os dados ficam como `String` (`unlines [...]`) no próprio código, com linhas de comentário
+(`#`) e linhas em branco, no formato da Camada 3, para que o `main` passe pela leitura e
+pela validação exatamente como uma entrada real. O mesmo módulo tem `dadosComErros`,
+um texto com vários erros diferentes, para demonstrar `todosOsErros`.
 
 ---
 

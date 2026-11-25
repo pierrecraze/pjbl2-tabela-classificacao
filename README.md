@@ -45,3 +45,30 @@ ghc -Wall -isrc -outputdir build -o tabela src/Main.hs
 # executar
 ./tabela            # macOS / Linux
 tabela.exe          # Windows
+```
+
+Sem compilar, também dá para rodar direto:
+
+```bash
+runghc -isrc src/Main.hs
+```
+
+## Como rodar os testes
+
+```bash
+runghc -isrc tests/Testes.hs
+```
+
+Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`.
+
+## Estado atual
+
+- [x] Estrutura do projeto
+- [x] Decisões iniciais de modelagem (`docs/decisoes.md`)
+- [x] Camada 1 - tipos (`Time`, `Resultado`, `Partida`, `Linha`)
+- [x] Camada 1 - consultas básicas (`participou`, `resultadoPara`, `times`)
+- [x] Campeonato de teste (`Dados.hs`)
+- [x] Camada 2 - classificação e estatísticas
+- [ ] Camada 3 - leitura de uma linha (`Erro`, `separar`, `lerPartida`)
+- [ ] Camada 3 - campeonato inteiro e relatório de erros (`lerCampeonato`, `todosOsErros`)
+- [ ] Camada 3 - tabela formatada e `main` final
