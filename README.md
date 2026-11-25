@@ -65,7 +65,8 @@ Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`.
 
 - [x] Estrutura do projeto
 - [x] Decisões iniciais de modelagem (`docs/decisoes.md`)
-- [ ] Camada 1 - tipos e consultas básicas
+- [x] Camada 1 - tipos (`Time`, `Resultado`, `Partida`, `Linha`)
+- [ ] Camada 1 - consultas básicas (`participou`, `resultadoPara`, `times`)
 - [ ] Campeonato de teste (`Dados.hs`)
 - [ ] Camada 2 - classificação e estatísticas
 - [ ] Camada 3 - leitura, validação e tabela formatada
