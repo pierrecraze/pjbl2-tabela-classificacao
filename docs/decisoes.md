@@ -181,18 +181,38 @@ Evita a armadilha de encadear vários `sortBy` esperando que um preserve o anter
 As linhas são numeradas (`zip [1 ..]`) **antes** de descartar linhas em branco e comentários,
 para que "linha 7" aponte para a linha 7 que a pessoa vê no arquivo.
 
-### 🕓 Construtores de `Erro`
+### ✅ Construtores de `Erro`
 
-Os cinco exigidos (`CamposInvalidos`, `NumeroInvalido`, `PlacarNegativo`, `MesmoTime`,
-`TimeRepetidoNaRodada`), cada um com a linha (ou a rodada, no caso do time repetido) e,
-quando ajuda a mensagem, o trecho problemático (ex.: o texto que não virou número).
-Avaliando incluir também rodada menor que 1 e nome de time vazio.
+Os cinco exigidos e mais dois, cada um com a linha (ou a rodada, no caso do time repetido)
+e, quando ajuda a mensagem, o dado problemático:
 
-### 🕓 `lerPartida` com `do` na mônada `Either`
+| Construtor              | Carrega              | Exemplo de linha que provoca     |
+| ----------------------- | -------------------- | -------------------------------- |
+| `CamposInvalidos`       | linha, nº de campos  | `1;Coritiba;1;2`                 |
+| `NumeroInvalido`        | linha, texto lido    | `2;Paraná;dois;1;Operário`       |
+| `PlacarNegativo`        | linha                | `2;Cascavel;-1;2;Londrina`       |
+| `MesmoTime`             | linha, time          | `3;Athletico;1;1;Athletico`      |
+| `TimeRepetidoNaRodada`  | rodada, time         | o mesmo time em duas linhas da rodada |
+| `RodadaInvalida` (extra)| linha, rodada lida   | `0;Coritiba;1;0;Londrina`        |
+| `TimeVazio` (extra)     | linha                | `1; ;1;0;Londrina`               |
+
+Os dois extras fecham buracos que os cinco não pegam: `readMaybe` aceita `0` e `-3` como
+rodada, e um nome em branco passaria como um time chamado `""`.
+
+### ✅ `separar` com `break` (recursão permitida nesta camada)
+
+`separar` mantém campos vazios (`"a;;b"` dá três campos), para que a contagem de campos
+detecte um `;` a mais ou a menos. Não remove espaços: isso é papel de `lerPartida`, que
+apara cada campo, então `"1; Coritiba ; 2; 1; Athletico"` é aceito. A Camada 3 não proíbe
+recursão, e `break` + recursão deixa explícito onde cada campo termina sem precisar de um
+caso "impossível" (que uma versão com `foldr` exigiria para o `-Wall` não reclamar).
+
+### ✅ `lerPartida` com `do` na mônada `Either`
 
 Ordem das verificações: quantidade de campos → números (`readMaybe`, nunca `read`)
-→ placar negativo → mesmo time. O primeiro `Left` interrompe o resto, sem `case` aninhado.
-Espaços em volta dos campos são removidos (`" Coritiba "` vira `"Coritiba"`).
+→ rodada ≥ 1 → nomes não vazios → placar não negativo → times diferentes. O primeiro
+`Left` interrompe o resto, sem `case` aninhado. `lerNumero` usa `maybe` para transformar o
+`Nothing` do `readMaybe` em `NumeroInvalido` com a linha e o texto lido.
 
 ### 🕓 `lerCampeonato` vs. `todosOsErros`
 

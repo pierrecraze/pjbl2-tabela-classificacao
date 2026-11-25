@@ -3,6 +3,7 @@ module Main (main) where
 import Control.Monad (unless)
 import System.Exit (exitFailure)
 import Classificacao
+import Leitura
 import Tipos
 
 main :: IO ()
@@ -52,6 +53,27 @@ main = do
         , conferir "maior goleada sem partidas" (maiorGoleada []) Nothing
         , conferir "media de gols" (mediaGols [jogo, goleada]) (Just 3.5)
         , conferir "media de gols sem partidas" (mediaGols []) Nothing
+        -- camada 3: separar e lerPartida
+        , conferir "separar mantem campos vazios" (separar ';' "a;;b;") ["a", "", "b", ""]
+        , conferir "separar texto vazio" (separar ';' "") [""]
+        , conferir "lerPartida valida, com espacos"
+            (lerPartida 1 " 1 ; Coritiba ; 1 ; 2 ; Athletico ") (Right jogo)
+        , conferir "CamposInvalidos" (lerPartida 2 "1;Coritiba;1;2")
+            (Left (CamposInvalidos 2 4))
+        , conferir "NumeroInvalido no placar" (lerPartida 3 "2;Parana;dois;1;Operario")
+            (Left (NumeroInvalido 3 "dois"))
+        , conferir "NumeroInvalido na rodada" (lerPartida 4 "2a;Parana;1;1;Operario")
+            (Left (NumeroInvalido 4 "2a"))
+        , conferir "PlacarNegativo" (lerPartida 5 "2;Cascavel;-1;2;Londrina")
+            (Left (PlacarNegativo 5))
+        , conferir "MesmoTime" (lerPartida 6 "3;Athletico;1;1;Athletico")
+            (Left (MesmoTime 6 "Athletico"))
+        , conferir "RodadaInvalida" (lerPartida 7 "0;Coritiba;1;0;Londrina")
+            (Left (RodadaInvalida 7 0))
+        , conferir "TimeVazio" (lerPartida 8 "1; ;1;0;Londrina")
+            (Left (TimeVazio 8))
+        , conferir "primeiro erro interrompe o resto" (lerPartida 9 "x;A;-1;0;A")
+            (Left (NumeroInvalido 9 "x"))
         ]
   mapM_ (\(nome, ok, valor) -> putStrLn
     (if ok then "OK " ++ nome else "FALHOU " ++ nome ++ ": " ++ valor)) casos
