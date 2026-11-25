@@ -93,7 +93,7 @@ O campo de nome do time se chama `time` (e não `nome`) para casar com o tipo `T
 Nenhum campo se chama `saldo`, porque `saldo :: Linha -> Int` é uma função obrigatória
 da Camada 2 e os dois nomes colidiriam.
 
-### 🕓 Consultas básicas
+### ✅ Consultas básicas
 
 - `participou t p`: `t` é o mandante **ou** o visitante.
 - `resultadoPara t p`: compara os gols do ponto de vista de `t`; `Nothing` se `t` não jogou.

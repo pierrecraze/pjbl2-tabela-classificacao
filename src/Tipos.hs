@@ -3,7 +3,12 @@ module Tipos
   , Resultado (..)
   , Partida (..)
   , Linha (..)
+  , participou
+  , resultadoPara
+  , times
   ) where
+
+import Data.List (nub, sort)
 
 -- ===== Camada 1: Tipos e Dados do Campeonato =====
 -- Define o que existe no domínio. As decisões estão em docs/decisoes.md.
@@ -40,3 +45,23 @@ data Linha = Linha
   , golsPro    :: Int
   , golsContra :: Int
   } deriving (Show, Eq)
+
+participou :: Time -> Partida -> Bool
+participou equipe partida =
+  equipe == mandante partida || equipe == visitante partida
+
+resultadoPara :: Time -> Partida -> Maybe Resultado
+resultadoPara equipe partida
+  | equipe == mandante partida  = Just (resultado casa fora)
+  | equipe == visitante partida = Just (resultado fora casa)
+  | otherwise                   = Nothing
+  where
+    casa = golsMandante partida
+    fora = golsVisitante partida
+    resultado pro contra
+      | pro > contra = Vitoria
+      | pro < contra = Derrota
+      | otherwise    = Empate
+
+times :: [Partida] -> [Time]
+times partidas = sort (nub (map mandante partidas ++ map visitante partidas))
