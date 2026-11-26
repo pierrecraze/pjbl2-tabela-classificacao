@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Control.Monad (unless)
+import Data.List (nub)
 import System.Exit (exitFailure)
 import Classificacao
 import Dados
@@ -102,6 +103,26 @@ main = do
             [ NumeroInvalido 4 "dois", PlacarNegativo 5, MesmoTime 6 "Athletico"
             , CamposInvalidos 7 4, TimeRepetidoNaRodada 1 "Coritiba" ]
         , conferir "todosOsErros de entrada valida" (todosOsErros dadosCampeonato) []
+        -- camada 3: saida
+        , conferir "tabela vazia tem so o cabecalho"
+            (map words (lines (tabelaFormatada [])))
+            [["Pos", "Time", "P", "J", "V", "E", "D", "SG"]]
+        , conferir "tabela final: cabecalho + 6 times"
+            (fmap (length . lines . tabelaFormatada . classificacao) (lerCampeonato dadosCampeonato))
+            (Right 7)
+        , conferir "linha do lider na tabela formatada"
+            (fmap (map words . take 1 . drop 1 . lines . tabelaFormatada . classificacao)
+                  (lerCampeonato dadosCampeonato))
+            (Right [["1", "Athletico", "10", "5", "3", "1", "1", "+5"]])
+        , conferir "colunas alinhadas (todas as linhas com a mesma largura)"
+            (fmap (length . nub . map length . lines . tabelaFormatada . classificacao)
+                  (lerCampeonato dadosCampeonato))
+            (Right 1)
+        , conferir "mensagem de erro cita a linha"
+            (descreverErro (NumeroInvalido 4 "dois")) "linha 4: \"dois\" não é um número inteiro"
+        , conferir "mensagem de erro de rodada cita a rodada"
+            (descreverErro (TimeRepetidoNaRodada 1 "Coritiba"))
+            "rodada 1: Coritiba está escalado em mais de uma partida"
         ]
   mapM_ (\(nome, ok, valor) -> putStrLn
     (if ok then "OK " ++ nome else "FALHOU " ++ nome ++ ": " ++ valor)) casos

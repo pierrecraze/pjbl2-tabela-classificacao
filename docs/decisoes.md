@@ -1,10 +1,8 @@
 # Decisões de modelagem e limitações conhecidas
 
 Este documento registra **por que** o código está escrito do jeito que está.
-Ele é atualizado junto com o código: cada decisão marcada como *planejada* vira
-*tomada* (ou é revista) quando a camada correspondente for implementada.
-
-Legenda: ✅ tomada e implementada · 🕓 planejada (ainda não implementada)
+Ele foi atualizado junto com o código: cada decisão começou como *planejada* e foi
+marcada como *tomada* (✅) quando a camada correspondente foi implementada.
 
 ---
 
@@ -231,6 +229,26 @@ Ordem das verificações: quantidade de campos → números (`readMaybe`, nunca 
 
 ---
 
+### ✅ `tabelaFormatada` e mensagens de erro
+
+- A largura da coluna do time é a do maior nome (calculada com `foldr max`, que tem valor
+  inicial e por isso não quebra com a tabela vazia, ao contrário de `maximum`); os números
+  são alinhados à direita. Um teste confere que todas as linhas têm a mesma largura.
+- O saldo sai com sinal (`+5`, `0`, `-10`), como nas tabelas de jornal.
+- `descreverErro` transforma cada construtor numa frase que sempre começa por onde está o
+  problema (`linha 4: ...` ou `rodada 1: ...`). Ela fica na Camada 3 e é pura: o `main` só imprime.
+
+### ✅ `main` como casca fina de IO
+
+`main` só fixa a codificação da saída e imprime `relatorio`, uma `String` montada por funções
+puras do próprio `Main.hs`. Assim "a única função com IO" vale ao pé da letra, e toda a
+demonstração pode ser conferida sem executar nada. O resultado de `lerCampeonato` é tratado
+com `either`: se o campeonato de teste tivesse um erro, o programa mostraria a mensagem e
+seguiria para a demonstração da entrada com erros. Os `Maybe` das estatísticas são tratados
+com `maybe` (e `listToMaybe` para pegar o líder sem `head`). Números decimais saem com duas
+casas e vírgula por uma função própria (`duasCasas`), porque `Text.Printf` não está na lista
+de módulos do enunciado.
+
 ## Limitações conhecidas
 
 - **Critérios de desempate parciais**: confronto direto, cartões e sorteio não são modelados
@@ -242,3 +260,14 @@ Ordem das verificações: quantidade de campos → números (`readMaybe`, nunca 
   pede; a consistência é garantida por construção (toda `Linha` sai de `linhaDoTime`), não pelo tipo.
 - **Gols são `Int`**: o tipo aceita negativos; a regra "placar não negativo" é verificada em tempo de
   execução, na leitura (como discutido na Aula 13, "Tipos não resolvem tudo").
+- **`lerCampeonato` acusa um erro só**: o primeiro erro de linha, ou, se não houver, o primeiro
+  time repetido numa rodada. Para ver todos os problemas é preciso chamar `todosOsErros`.
+- **Não checamos o campeonato como um todo**: dois jogos entre os mesmos times, rodadas faltando
+  ou times com número diferente de jogos são aceitos; só a regra de um jogo por time em cada
+  rodada é verificada.
+- **Alinhamento da tabela**: conta um caractere por letra. Funciona com os nomes acentuados do
+  teste (gravados como um caractere só), mas um nome com acento "decomposto" (letra + acento
+  combinante) ou caracteres largos sairia desalinhado.
+- **Dados fixos no código**: os dados ficam em `Dados.hs`, como `String` (compatível com o
+  playground). Ler de um arquivo com `readFile` seria uma mudança só no `main`, já que a leitura
+  recebe uma `String`.

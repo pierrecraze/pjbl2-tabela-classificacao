@@ -4,6 +4,8 @@ module Leitura
   , lerPartida
   , lerCampeonato
   , todosOsErros
+  , tabelaFormatada
+  , descreverErro
   ) where
 
 import Data.Char (isSpace)
@@ -11,6 +13,7 @@ import Data.Either (lefts, rights)
 import Data.List (dropWhileEnd, isPrefixOf, nub, (\\))
 import Text.Read (readMaybe)
 
+import Classificacao (pontosLinha, saldo)
 import Tipos
 
 -- ===== Camada 3: Leitura, Validação e Saída =====
@@ -71,7 +74,56 @@ todosOsErros texto = lefts lidas ++ errosDeRodada (rights lidas)
   where
     lidas = map (uncurry lerPartida) (linhasUteis texto)
 
+-- | Tabela pronta para impressão: posição, time, pontos, jogos, vitórias,
+-- empates, derrotas e saldo. A coluna do time se ajusta ao maior nome, então
+-- todas as linhas saem com a mesma largura. Lista vazia dá só o cabeçalho.
+tabelaFormatada :: [Linha] -> String
+tabelaFormatada linhas = unlines (cabecalho : zipWith formatar [1 :: Int ..] linhas)
+  where
+    -- foldr com valor inicial no lugar de maximum: funciona com lista vazia
+    largura = foldr (max . length . time) (length "Time") linhas
+
+    cabecalho = linhaDaTabela "Pos" "Time" ["P", "J", "V", "E", "D", "SG"]
+
+    formatar pos l =
+      linhaDaTabela (show pos) (time l)
+        (map show [pontosLinha l, jogos l, vitorias l, empates l, derrotas l]
+           ++ [comSinal (saldo l)])
+
+    linhaDaTabela pos nome numeros =
+      alinharDireita 3 pos ++ "  " ++ alinharEsquerda largura nome
+        ++ concatMap (alinharDireita 4) numeros
+
+-- | Mensagem legível para cada erro, sempre dizendo onde está o problema.
+descreverErro :: Erro -> String
+descreverErro (CamposInvalidos n k) =
+  "linha " ++ show n ++ ": esperava 5 campos separados por ';', mas vieram " ++ show k
+descreverErro (NumeroInvalido n txt) =
+  "linha " ++ show n ++ ": \"" ++ txt ++ "\" não é um número inteiro"
+descreverErro (PlacarNegativo n) =
+  "linha " ++ show n ++ ": placar com gols negativos"
+descreverErro (MesmoTime n equipe) =
+  "linha " ++ show n ++ ": " ++ equipe ++ " jogaria contra si mesmo"
+descreverErro (TimeRepetidoNaRodada r equipe) =
+  "rodada " ++ show r ++ ": " ++ equipe ++ " está escalado em mais de uma partida"
+descreverErro (RodadaInvalida n r) =
+  "linha " ++ show n ++ ": rodada " ++ show r ++ " inválida (deve ser 1 ou mais)"
+descreverErro (TimeVazio n) =
+  "linha " ++ show n ++ ": nome de time em branco"
+
 -- ---------- auxiliares (não exportadas) ----------
+
+alinharEsquerda :: Int -> String -> String
+alinharEsquerda n txt = txt ++ replicate (n - length txt) ' '
+
+alinharDireita :: Int -> String -> String
+alinharDireita n txt = replicate (n - length txt) ' ' ++ txt
+
+-- saldo positivo com sinal, como nas tabelas de jornal: +5, 0, -10
+comSinal :: Int -> String
+comSinal x
+  | x > 0     = '+' : show x
+  | otherwise = show x
 
 -- linhas que contêm partidas, já com o número da linha no texto original:
 -- a numeração vem antes do filtro, então "linha 7" é a sétima linha que a

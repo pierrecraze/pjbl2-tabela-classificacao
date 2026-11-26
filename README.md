@@ -59,7 +59,35 @@ runghc -isrc src/Main.hs
 runghc -isrc tests/Testes.hs
 ```
 
-Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`.
+Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`; se algum falhar,
+o programa de testes termina com código de saída 1.
+
+## O que o programa mostra
+
+O `main` lê o campeonato de teste (`Dados.hs`) pela Camada 3 e imprime, em sequência,
+a classificação final, a classificação após a rodada 3, as estatísticas da Camada 2 e o
+tratamento de uma entrada com erros. Trecho da saída:
+
+```
+=== Classificação final ===
+Pos  Time        P   J   V   E   D  SG
+  1  Athletico  10   5   3   1   1  +5
+  2  Coritiba   10   5   3   1   1  +4
+  3  Londrina   10   5   3   1   1  +3
+  4  Paraná      5   5   1   2   2  -1
+  5  Operário    4   5   1   1   3  -1
+  6  Cascavel    3   5   1   0   4 -10
+...
+=== Entrada com erros (dadosComErros) ===
+lerCampeonato para no primeiro erro:
+  linha 4: "dois" não é um número inteiro
+todosOsErros lista todos:
+  - linha 4: "dois" não é um número inteiro
+  - linha 5: placar com gols negativos
+  - linha 6: Athletico jogaria contra si mesmo
+  - linha 7: esperava 5 campos separados por ';', mas vieram 4
+  - rodada 1: Coritiba está escalado em mais de uma partida
+```
 
 ## Estado atual
 
@@ -71,4 +99,5 @@ Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`.
 - [x] Camada 2 - classificação e estatísticas
 - [x] Camada 3 - leitura de uma linha (`Erro`, `separar`, `lerPartida`)
 - [x] Camada 3 - campeonato inteiro e relatório de erros (`lerCampeonato`, `todosOsErros`)
-- [ ] Camada 3 - tabela formatada e `main` final
+- [x] Camada 3 - tabela formatada e `main` final
+- [x] Testes das três camadas (55 casos)
