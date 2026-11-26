@@ -3,6 +3,7 @@ module Main (main) where
 import Control.Monad (unless)
 import System.Exit (exitFailure)
 import Classificacao
+import Dados
 import Leitura
 import Tipos
 
@@ -74,6 +75,33 @@ main = do
             (Left (TimeVazio 8))
         , conferir "primeiro erro interrompe o resto" (lerPartida 9 "x;A;-1;0;A")
             (Left (NumeroInvalido 9 "x"))
+        -- camada 3: campeonato inteiro (Dados.hs)
+        , conferir "lerCampeonato valido devolve Right com 15 partidas"
+            (fmap length (lerCampeonato dadosCampeonato)) (Right 15)
+        , conferir "classificacao final do campeonato de teste"
+            (fmap (map time . classificacao) (lerCampeonato dadosCampeonato))
+            (Right ["Athletico", "Coritiba", "Londrina", "Paraná", "Operário", "Cascavel"])
+        , conferir "triplo empate em pontos e vitorias, decidido pelo saldo"
+            (fmap (map (\l -> (pontosLinha l, vitorias l, saldo l)) . take 3 . classificacao)
+                  (lerCampeonato dadosCampeonato))
+            (Right [(10, 3, 5), (10, 3, 4), (10, 3, 3)])
+        , conferir "pontos da tabela final"
+            (fmap (map pontosLinha . classificacao) (lerCampeonato dadosCampeonato))
+            (Right [10, 10, 10, 5, 4, 3])
+        , conferir "classificacao ate a rodada 3 difere da final"
+            (fmap (map time . classificacao . ateRodada 3) (lerCampeonato dadosCampeonato))
+            (Right ["Athletico", "Londrina", "Operário", "Coritiba", "Paraná", "Cascavel"])
+        , conferir "campeonato vazio" (lerCampeonato "# so comentario\n\n") (Right [])
+        , conferir "TimeRepetidoNaRodada"
+            (lerCampeonato "1;Coritiba;2;1;Athletico\n1;Coritiba;0;0;Londrina")
+            (Left (TimeRepetidoNaRodada 1 "Coritiba"))
+        , conferir "lerCampeonato para no primeiro erro de linha"
+            (lerCampeonato dadosComErros) (Left (NumeroInvalido 4 "dois"))
+        , conferir "todosOsErros lista todos, com a linha do texto original"
+            (todosOsErros dadosComErros)
+            [ NumeroInvalido 4 "dois", PlacarNegativo 5, MesmoTime 6 "Athletico"
+            , CamposInvalidos 7 4, TimeRepetidoNaRodada 1 "Coritiba" ]
+        , conferir "todosOsErros de entrada valida" (todosOsErros dadosCampeonato) []
         ]
   mapM_ (\(nome, ok, valor) -> putStrLn
     (if ok then "OK " ++ nome else "FALHOU " ++ nome ++ ": " ++ valor)) casos

@@ -70,5 +70,5 @@ Cada caso imprime `OK <nome>` ou `FALHOU <nome>: <valor obtido>`.
 - [x] Campeonato de teste (`Dados.hs`)
 - [x] Camada 2 - classificação e estatísticas
 - [x] Camada 3 - leitura de uma linha (`Erro`, `separar`, `lerPartida`)
-- [ ] Camada 3 - campeonato inteiro e relatório de erros (`lerCampeonato`, `todosOsErros`)
+- [x] Camada 3 - campeonato inteiro e relatório de erros (`lerCampeonato`, `todosOsErros`)
 - [ ] Camada 3 - tabela formatada e `main` final

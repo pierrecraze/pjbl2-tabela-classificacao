@@ -176,7 +176,7 @@ Evita a armadilha de encadear vários `sortBy` esperando que um preserve o anter
 
 ## 3. Camada 3 - Leitura e validação (`Leitura.hs`)
 
-### 🕓 Erros carregam o número da linha **do texto original**
+### ✅ Erros carregam o número da linha **do texto original**
 
 As linhas são numeradas (`zip [1 ..]`) **antes** de descartar linhas em branco e comentários,
 para que "linha 7" aponte para a linha 7 que a pessoa vê no arquivo.
@@ -214,12 +214,20 @@ Ordem das verificações: quantidade de campos → números (`readMaybe`, nunca 
 `Left` interrompe o resto, sem `case` aninhado. `lerNumero` usa `maybe` para transformar o
 `Nothing` do `readMaybe` em `NumeroInvalido` com a linha e o texto lido.
 
-### 🕓 `lerCampeonato` vs. `todosOsErros`
+### ✅ `lerCampeonato` vs. `todosOsErros`
 
-- `lerCampeonato`: `traverse` sobre as linhas (para no primeiro erro) e, se todas forem
-  válidas, verifica times repetidos na mesma rodada.
-- `todosOsErros`: valida cada linha de forma independente e junta **todos** os `Left`
-  (mais os erros de rodada), para o relatório completo.
+- `lerCampeonato`: `traverse (uncurry lerPartida)` sobre as linhas numeradas, que para no
+  primeiro erro de linha; se todas forem válidas, procura times escalados duas vezes na mesma
+  rodada e devolve o primeiro como `TimeRepetidoNaRodada`. Por isso, numa entrada com erros
+  de linha **e** de rodada, `lerCampeonato` acusa o erro de linha (o de rodada só pode ser
+  verificado com as partidas já lidas).
+- `todosOsErros`: lê cada linha de forma independente (`map`), junta todos os `Left` com
+  `lefts` e roda a checagem de rodada sobre as partidas válidas (`rights`). Os erros de linha
+  vêm primeiro, na ordem do texto, e depois os de rodada.
+- A checagem de rodada usa `xs \\ nub xs`: tirar uma ocorrência de cada time da lista de
+  escalados da rodada deixa exatamente os que apareceram mais de uma vez.
+- Um texto só com comentários e linhas em branco é um campeonato **vazio** válido
+  (`Right []`), e a Camada 2 já trata a lista vazia sem quebrar.
 
 ---
 

@@ -2,10 +2,13 @@ module Leitura
   ( Erro (..)
   , separar
   , lerPartida
+  , lerCampeonato
+  , todosOsErros
   ) where
 
 import Data.Char (isSpace)
-import Data.List (dropWhileEnd)
+import Data.Either (lefts, rights)
+import Data.List (dropWhileEnd, isPrefixOf, nub, (\\))
 import Text.Read (readMaybe)
 
 import Tipos
@@ -50,7 +53,47 @@ lerPartida n linha = do
   exigir (m /= v)                     (MesmoTime n m)
   Right (Partida rod m golsM golsV v)
 
+-- | Lê o texto inteiro. O traverse aplica lerPartida a cada linha e para no
+-- primeiro Left; se todas as linhas forem válidas, ainda confere se algum time
+-- foi escalado duas vezes na mesma rodada.
+lerCampeonato :: String -> Either Erro [Partida]
+lerCampeonato texto = do
+  partidas <- traverse (uncurry lerPartida) (linhasUteis texto)
+  case errosDeRodada partidas of
+    []         -> Right partidas
+    (erro : _) -> Left erro
+
+-- | Relatório completo: cada linha é lida de forma independente, então um erro
+-- não esconde os seguintes. As partidas válidas ainda passam pela checagem de
+-- time repetido na rodada.
+todosOsErros :: String -> [Erro]
+todosOsErros texto = lefts lidas ++ errosDeRodada (rights lidas)
+  where
+    lidas = map (uncurry lerPartida) (linhasUteis texto)
+
 -- ---------- auxiliares (não exportadas) ----------
+
+-- linhas que contêm partidas, já com o número da linha no texto original:
+-- a numeração vem antes do filtro, então "linha 7" é a sétima linha que a
+-- pessoa vê no arquivo, contando comentários e linhas em branco
+linhasUteis :: String -> [(Int, String)]
+linhasUteis = filter (temPartida . snd) . zip [1 ..] . lines
+  where
+    temPartida linha = not (null (aparar linha) || "#" `isPrefixOf` aparar linha)
+
+-- um erro para cada time que aparece mais de uma vez numa mesma rodada,
+-- na ordem das rodadas
+errosDeRodada :: [Partida] -> [Erro]
+errosDeRodada partidas =
+  [ TimeRepetidoNaRodada r equipe
+  | r <- nub (map rodada partidas)
+  , equipe <- repetidos (concatMap escalados (filter ((== r) . rodada) partidas))
+  ]
+  where
+    escalados p = [mandante p, visitante p]
+    -- xs \\ nub xs tira uma ocorrência de cada; o que sobra é o que se repetiu
+    repetidos xs = nub (xs \\ nub xs)
+
 
 -- remove espaços em volta de um campo: " Coritiba " vira "Coritiba"
 aparar :: String -> String
